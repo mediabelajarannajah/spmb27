@@ -1,152 +1,513 @@
 <!DOCTYPE html>
-<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PSB 2027/2028</title>
-<style>
-:root{--g:#0f766e;--g2:#0d5c56;--bg:#f6f8f7;--t:#1f2937;--m:#6b7280;--b:#e5e7eb}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--t);line-height:1.6}
-a{color:var(--g)}header{background:var(--g);color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
-header a{color:#fff;text-decoration:none;margin-left:16px;font-size:14px}header b{font-size:16px}
-.wrap{max-width:1000px;margin:0 auto;padding:20px}.hero{background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;padding:56px 20px;text-align:center}
-.hero h1{margin:0 0 8px;font-size:clamp(24px,5vw,38px)}.card{background:#fff;border:1px solid var(--b);border-radius:12px;padding:20px;margin-bottom:16px}
-h2{color:var(--g);margin:28px 0 12px}.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-.ph,.grid img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;background:#d1e7e4;display:flex;align-items:center;justify-content:center;color:var(--g);font-size:13px}
-.btn{display:inline-block;background:var(--g);color:#fff;border:0;border-radius:8px;padding:10px 18px;font-size:15px;cursor:pointer;text-decoration:none}
-.btn:hover{background:var(--g2)}.btn.o{background:#fff;color:var(--g);border:1px solid var(--g)}
-form .f{margin-bottom:14px}label{display:block;font-weight:600;font-size:14px;margin-bottom:4px}label i{color:#dc2626}
-input,select,textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}
-input:focus,select:focus,textarea:focus{outline:2px solid var(--g);border-color:var(--g)}.err{color:#dc2626;font-size:12px;min-height:16px}
-.two{display:grid;gap:0 16px;grid-template-columns:1fr 1fr}@media(max-width:640px){.two{grid-template-columns:1fr}}
-#modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
-#modal .box{background:#fff;border-radius:14px;padding:28px;max-width:400px;width:100%;text-align:center}
-.spin{width:44px;height:44px;border:5px solid #d1e7e4;border-top-color:var(--g);border-radius:50%;animation:s 1s linear infinite;margin:0 auto 12px}@keyframes s{to{transform:rotate(360deg)}}
-.ico{font-size:46px}.stats{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-.stat{background:#fff;border:1px solid var(--b);border-radius:12px;padding:16px;text-align:center}.stat b{font-size:30px;color:var(--g);display:block}
-.tabs button{border:0;background:#e5e7eb;padding:8px 16px;border-radius:8px 8px 0 0;cursor:pointer;margin-right:4px}.tabs .on{background:var(--g);color:#fff}
-.tw{overflow-x:auto;background:#fff;border:1px solid var(--b)}table{border-collapse:collapse;font-size:13px;width:100%}
-th,td{padding:8px 10px;border-bottom:1px solid var(--b);white-space:nowrap;text-align:left}th{background:#f0f5f4;position:sticky;top:0}
-footer{text-align:center;color:var(--m);padding:24px;font-size:13px}
-</style></head><body>
-<header><b id="hn">PSB</b><nav><a href="#">Beranda</a><a href="#admin">Admin</a></nav></header>
-<main id="app"><div class="wrap">Memuat…</div></main>
-<footer id="ft"></footer>
-<div id="modal"><div class="box" id="mbox"></div></div>
-<script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbwTzeIQtJ5085TC1bFXbRrvkDlocXI4nctzQyNI9BMMfXVivxkJBsfyZ1dBzoaPq_vo/exec';   // URL Web App Apps Script
-const SITE = {
-  yayasan: {
-    nama: 'Yayasan Pendidikan Islam ........',
-    profil: 'Tulis profil singkat yayasan di sini: tahun berdiri, sejarah, lokasi, dan keunggulan lembaga.',
-    visi: 'Terwujudnya generasi santri yang beriman, berilmu, dan berakhlak mulia.',
-    misi: ['Menyelenggarakan pendidikan berbasis nilai-nilai Islam.', 'Mengembangkan potensi akademik dan non-akademik santri.',
-           'Membangun karakter mandiri, disiplin, dan peduli.', 'Menjalin kemitraan erat dengan orang tua dan masyarakat.'],
-    alamat: 'Alamat yayasan', kontak: '08xx-xxxx-xxxx'
-  },
-  // Taruh file foto di folder img/ pada repo GitHub
-  foto: { gedung: ['img/1.jpg', 'img/gedung2.jpg'], kegiatan: ['img/kegiatan1.jpg', 'img/kegiatan2.jpg', 'img/kegiatan3.jpg', 'img/kegiatan4.jpg'] }
-};
-// Pengganti gsRun(): memanggil Apps Script lewat fetch (text/plain agar tanpa preflight CORS)
-function gsRun() {
-  let ok = () => {}, fail = () => {};
-  const r = new Proxy({}, { get: (_, k) => k === 'withSuccessHandler' ? f => (ok = f, r) : k === 'withFailureHandler' ? f => (fail = f, r) :
-    (...a) => { fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: k, args: a }) }).then(x => x.json()).then(ok, fail); } });
-  return r;
-}
-let C, $ = s => document.querySelector(s);
-const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-gsRun().withSuccessHandler(c => { C = Object.assign(c, SITE); $('#hn').textContent = c.yayasan.nama; $('#ft').textContent = '© PSB ' + c.tahun + ' – ' + c.yayasan.nama; route(); })
-  .withFailureHandler(e => $('#app').innerHTML = '<div class="wrap">Gagal memuat: ' + esc(e.message) + '</div>').getConfig();
-addEventListener('hashchange', route);
-function route() {
-  const h = location.hash.slice(1).split('/'); window.scrollTo(0, 0);
-  if (h[0] === 'daftar' && C.units[h[1]]) form(h[1]); else if (h[0] === 'admin') admin(); else home();
-}
-const pic = (u, t) => u ? '<img src="' + esc(u) + '" alt="' + t + '" loading="lazy" onerror="this.remove()">' : '<div class="ph">Foto ' + t + '</div>';
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPMB Sekolah Sunnah An-Najah | Generasi Tauhid Beradab 2027/2028</title>
+    <meta name="description" content="Penerimaan Peserta Didik Baru Tahun Ajaran 2027/2028 Yayasan An-Najah Ihya As-Sunnah. Membentuk Generasi Tauhid yang Beradab, Mandiri, dan Berprestasi.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- SweetAlert2 untuk Popup Elegan -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#0f766e', // Teal 700
+                        secondary: '#115e59', // Teal 800
+                        accent: '#f59e0b', // Amber 500
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-effect { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); }
+        .gradient-bg { background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%); }
+        .text-gradient { background: linear-gradient(to right, #0f766e, #14b8a6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased">
 
-function home() {
-  const y = C.yayasan;
-  $('#app').innerHTML = `<div class="hero"><h1>Penerimaan Santri Baru</h1><p>Tahun Ajaran ${C.tahun}</p><p>${esc(y.nama)}</p>
-  <a class="btn" style="background:#fff;color:var(--g)" href="#units">Daftar Sekarang</a></div>
-  <div class="wrap">
-  <h2>Profil Yayasan</h2><div class="card">${esc(y.profil)}</div>
-  <div class="grid"><div class="card"><h3>Visi</h3>${esc(y.visi)}</div><div class="card"><h3>Misi</h3><ol>${y.misi.map(m => '<li>' + esc(m) + '</li>').join('')}</ol></div></div>
-  <h2>Gedung Sekolah</h2><div class="grid">${C.foto.gedung.map(u => pic(u, 'Gedung')).join('')}</div>
-  <h2>Kegiatan Santri</h2><div class="grid">${C.foto.kegiatan.map(u => pic(u, 'Kegiatan')).join('')}</div>
-  <h2 id="units">Pilih Unit Pendaftaran</h2><div class="grid">${Object.keys(C.units).map(k =>
-    `<div class="card" style="text-align:center"><h3>${esc(C.units[k].nama)}</h3><p>Pendaftaran santri baru ${C.tahun}</p><a class="btn" href="#daftar/${k}">Daftar ${k}</a></div>`).join('')}</div>
-  <div class="card">📍 ${esc(y.alamat)} &nbsp; 📞 ${esc(y.kontak)}</div></div>`;
-}
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 glass-effect border-b border-gray-100 shadow-sm transition-all duration-300">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <img src="https://i0.wp.com/annajahtakengon.sch.id/wp-content/uploads/2020/12/An-Najah-min.png?resize=300%2C298&ssl=1" alt="Logo An-Najah" class="h-10 md:h-12">
+                <div class="hidden md:block">
+                    <h1 class="font-bold text-primary text-lg leading-tight">Sekolah Sunnah An-Najah</h1>
+                    <p class="text-xs text-gray-500">Generasi Tauhid Beradab</p>
+                </div>
+            </div>
+            <div class="hidden md:flex gap-8 font-medium text-sm text-gray-600">
+                <a href="#jenjang" class="hover:text-primary transition">Jenjang</a>
+                <a href="#keunggulan" class="hover:text-primary transition">Keunggulan</a>
+                <a href="#jadwal" class="hover:text-primary transition">Jadwal</a>
+                <a href="#biaya" class="hover:text-primary transition">Biaya Pendaftaran</a>
+                <a href="#daftar" class="px-5 py-2 bg-primary text-white rounded-full hover:bg-secondary transition shadow-md">Daftar Sekarang</a>
+            </div>
+            <!-- Mobile Menu Button (Simplified) -->
+            <a href="#daftar" class="md:hidden px-4 py-2 bg-primary text-white text-sm rounded-full">Daftar</a>
+        </div>
+    </nav>
 
-function field(f) {
-  const r = f.required ? ' <i>*</i>' : '', n = 'name="' + f.name + '" id="f_' + f.name + '"';
-  let el;
-  if (f.type === 'select') el = `<select ${n}><option value="">-- pilih --</option>${f.options.map(o => `<option>${esc(o)}</option>`).join('')}</select>`;
-  else if (f.type === 'textarea') el = `<textarea ${n} rows="3"></textarea>`;
-  else el = `<input ${n} type="${f.type === 'tel' ? 'tel' : f.type}" ${f.digits ? 'inputmode="numeric" maxlength="' + f.digits + '"' : ''}>`;
-  return `<div class="f"><label>${esc(f.label)}${r}</label>${el}<div class="err" id="e_${f.name}"></div></div>`;
-}
+    <!-- Hero Section -->
+    <header class="gradient-bg text-white pt-32 pb-20 md:pt-40 md:pb-32 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/islamic-geo.png')]"></div>
+        <div class="container mx-auto px-4 text-center relative z-10" data-aos="fade-up">
+            <span class="inline-block px-4 py-1 bg-white/20 rounded-full text-sm font-semibold mb-6 backdrop-blur-sm border border-white/30">
+                ✨ SPMB Tahun Ajaran 2027/2028 Telah Dibuka
+            </span>
+            <img src="https://i0.wp.com/annajahtakengon.sch.id/wp-content/uploads/2020/12/An-Najah-min.png?resize=300%2C298&ssl=1" alt="Logo Yayasan" class="h-28 md:h-36 mx-auto mb-6 drop-shadow-2xl">
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
+                Membentuk Generasi Tauhid <br class="hidden md:block" /> yang <span class="text-accent">Beradab & Berprestasi</span>
+            </h1>
+            <p class="text-lg md:text-xl text-teal-100 max-w-3xl mx-auto mb-10 leading-relaxed">
+                Bismillahirrahmanirrahim. Abi dan Ummi yang dirahmati Allah, memilih sekolah adalah investasi terbesar untuk masa depan ananda. Hadirkan lingkungan di mana adab dan tauhid menjadi fondasi, sementara kecakapan akademik tumbuh selaras.
+            </p>
+            <a href="#daftar" class="inline-flex items-center px-8 py-4 bg-accent text-white font-bold rounded-xl shadow-lg hover:bg-amber-600 transform hover:scale-105 transition-all duration-300 text-lg">
+                Daftarkan Ananda Sekarang
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+            </a>
+        </div>
+    </header>
 
-function form(u) {
-  const U = C.units[u];
-  $('#app').innerHTML = `<div class="wrap"><a href="#">← Kembali</a><h2>Formulir Pendaftaran ${esc(U.nama)} – ${C.tahun}</h2>
-  <form class="card" id="fm" novalidate><div class="two">${U.fields.map(field).join('')}</div>
-  <button class="btn" type="submit">Kirim Pendaftaran</button></form></div>`;
-  $('#fm').onsubmit = e => {
-    e.preventDefault(); let ok = true, d = {};
-    U.fields.forEach(f => {
-      const v = $('#f_' + f.name).value.trim(); d[f.name] = v; let m = '';
-      if (f.required && !v) m = 'Wajib diisi';
-      else if (f.digits && v && !new RegExp('^\\d{' + f.digits + '}$').test(v)) m = 'Harus ' + f.digits + ' digit angka';
-      else if (f.type === 'tel' && v && !/^(\+62|62|0)8\d{7,12}$/.test(v.replace(/[\s-]/g, ''))) m = 'Nomor HP tidak valid';
-      $('#e_' + f.name).textContent = m; if (m) ok = false;
-    });
-    if (!ok) return modal('<div class="ico">⚠️</div><h3>Data belum lengkap</h3><p>Periksa isian yang bertanda merah.</p>' + close());
-    modal('<div class="spin"></div><h3>Mengirim data…</h3><p>Mohon tunggu, jangan tutup halaman.</p>');
-    gsRun().withSuccessHandler(r => {
-      if (r.ok) { $('#fm').reset(); success(u, r); }
-      else modal('<div class="ico">❌</div><h3>Gagal</h3><p>' + esc(r.msg) + '</p>' + close());
-    }).withFailureHandler(e => modal('<div class="ico">❌</div><h3>Gagal terkirim</h3><p>' + esc(e.message) + '</p>' + close())).submitForm(u, d);
-  };
-}
-function success(u, r) {
-  let t = 10;
-  const wa = r.wa ? '<a class="btn" href="' + esc(r.wa) + '">Gabung Grup WhatsApp ' + esc(u) + '</a><p id="cd" style="font-size:13px">Otomatis diarahkan dalam 10 detik…</p>' : close();
-  modal('<div class="ico">✅</div><h3>Berhasil!</h3><p>' + esc(r.msg) + '<br>Nomor pendaftaran:<br><b style="font-size:20px">' + esc(r.noReg) + '</b></p>' + wa);
-  if (r.wa) { const iv = setInterval(() => { if (--t <= 0) { clearInterval(iv); location.href = r.wa; } else $('#cd').textContent = 'Otomatis diarahkan dalam ' + t + ' detik…'; }, 1000); }
-}
-const close = () => '<button class="btn" onclick="$(\'#modal\').style.display=\'none\'">Tutup</button>';
-function modal(h) { $('#mbox').innerHTML = h; $('#modal').style.display = 'flex'; }
+    <!-- Jenjang Pendidikan -->
+    <section id="jenjang" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Pendidikan Terbaik untuk Ananda Tercinta</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Yayasan An-Najah Ihya As Sunnah hadir dengan program unggulan yang disesuaikan dengan tahap tumbuh kembang anak.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- TK -->
+                <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:shadow-xl transition-all duration-300 group" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-14 h-14 bg-teal-100 text-primary rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Taman Kanak-Kanak (TK)</h3>
+                    <p class="text-gray-600 mb-6">Membangun fondasi adab, cinta Al-Qur'an, dan semangat belajar sejak dini dalam lingkungan yang penuh kasih sayang.</p>
+                    <div class="flex items-center text-primary font-semibold">
+                        <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                        <a href="#daftar" class="inline-flex items-center text-primary font-semibold hover:text-secondary transition">Pendaftaran TK-A & TK-B Dibuka <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a>
+                    </div>
+                </div>
 
-function admin() {
-  $('#app').innerHTML = `<div class="wrap"><h2>Dashboard Admin</h2><form class="card" id="lg" style="max-width:420px">
-  <div class="f"><label>Cakupan</label><select id="sc"><option value="ALL">Semua Unit (Yayasan)</option>${Object.keys(C.units).map(k => `<option>${k}</option>`).join('')}</select></div>
-  <div class="f"><label>Password</label><input type="password" id="pw"></div><button class="btn">Masuk</button></form><div id="dash"></div></div>`;
-  $('#lg').onsubmit = e => {
-    e.preventDefault(); modal('<div class="spin"></div><h3>Memuat data…</h3>');
-    gsRun().withSuccessHandler(r => {
-      if (!r.ok) return modal('<div class="ico">❌</div><h3>' + esc(r.msg) + '</h3>' + close());
-      $('#modal').style.display = 'none'; $('#lg').style.display = 'none'; dash(r.data);
-    }).withFailureHandler(e => modal('<div class="ico">❌</div><p>' + esc(e.message) + '</p>' + close())).adminData($('#sc').value, $('#pw').value);
-  };
-}
+                <!-- SD -->
+                <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:shadow-xl transition-all duration-300 group" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-14 h-14 bg-teal-100 text-primary rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Sekolah Dasar (SD)</h3>
+                    <p class="text-gray-600 mb-6">Menyeimbangkan hafalan Al-Qur'an, pembentukan akhlak mulia, dan penguatan dasar ilmu pengetahuan umum yang kokoh.</p>
+                    <a href="#daftar" class="inline-flex items-center text-primary font-semibold hover:text-secondary transition">Lihat Detail & Daftar <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a>
+                </div>
 
-function dash(D) {
-  const ks = Object.keys(D), tot = ks.reduce((a, k) => a + D[k].rows.length, 0);
-  const L = (n, t) => `<div class="stat"><b>${n}</b>${t}</div>`;
-  $('#dash').innerHTML = `<div class="stats">${ks.length > 1 ? L(tot, 'Total Pendaftar') : ''}${ks.map(k => L(D[k].rows.length, 'Pendaftar ' + k)).join('')}</div>
-  <div class="tabs" style="margin-top:20px">${ks.map((k, i) => `<button data-k="${k}" class="${i ? '' : 'on'}">${k}</button>`).join('')}</div>
-  <div style="margin:10px 0"><input id="q" placeholder="Cari nama / NIK / apa saja…" style="max-width:320px"> <button class="btn o" id="ex">Unduh CSV</button></div>
-  <div class="tw" id="tb"></div>`;
-  let cur = ks[0];
-  const draw = () => {
-    const q = $('#q').value.toLowerCase(), d = D[cur], rows = d.rows.filter(r => !q || r.join(' ').toLowerCase().includes(q));
-    $('#tb').innerHTML = '<table><tr>' + d.headers.map(h => '<th>' + esc(h) + '</th>').join('') + '</tr>' +
-      rows.map(r => '<tr>' + r.map(c => '<td>' + esc(c) + '</td>').join('') + '</tr>').join('') + '</table>' + (rows.length ? '' : '<p style="padding:12px">Belum ada data.</p>');
-  };
-  document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { cur = b.dataset.k; document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b)); draw(); });
-  $('#q').oninput = draw;
-  $('#ex').onclick = () => {
-    const d = D[cur], csv = [d.headers].concat(d.rows).map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv' })); a.download = 'pendaftar-' + cur + '.csv'; a.click();
-  };
-  draw();
-}
-</script></body></html>
+                <!-- SMP -->
+                <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:shadow-xl transition-all duration-300 group" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-14 h-14 bg-teal-100 text-primary rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Sekolah Menengah Pertama (SMP)</h3>
+                    <p class="text-gray-600 mb-6">Mencetak pemuda berdaya saing tinggi dengan pondasi aqidah yang kokoh, siap menghadapi tantangan zaman.</p>
+                    <a href="#daftar" class="inline-flex items-center text-primary font-semibold hover:text-secondary transition">Lihat Detail & Daftar <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Keunggulan -->
+    <section id="keunggulan" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Mengapa Memilih Sekolah Sunnah An-Najah?</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Kami berkomitmen memberikan lebih dari sekadar pendidikan akademik, tetapi pembentukan karakter yang menyeluruh.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Item 1 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition border border-gray-100" data-aos="fade-up" data-aos-delay="100">
+                    <h4 class="font-bold text-lg text-primary mb-2">Pondasi Aqidah yang Kokoh</h4>
+                    <p class="text-gray-600 text-sm">Aqidah yang benar adalah landasan tegaknya agama dan kunci diterimanya setiap amal ibadah ananda.</p>
+                </div>
+                <!-- Item 2 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition border border-gray-100" data-aos="fade-up" data-aos-delay="150">
+                    <h4 class="font-bold text-lg text-primary mb-2">Pembentukan Akhlak Mulia</h4>
+                    <p class="text-gray-600 text-sm">Menumbuhkan ketenangan dan ketenteraman batin melalui keteladanan akhlak Islami dalam keseharian.</p>
+                </div>
+                <!-- Item 3 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition border border-gray-100" data-aos="fade-up" data-aos-delay="200">
+                    <h4 class="font-bold text-lg text-primary mb-2">Adab Sebagai Prioritas</h4>
+                    <p class="text-gray-600 text-sm">"Ilmu tanpa adab seperti api tanpa kayu bakar." Kami membentuk karakter unggul yang santun dan menghargai.</p>
+                </div>
+                <!-- Item 4 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition border border-gray-100" data-aos="fade-up" data-aos-delay="250">
+                    <h4 class="font-bold text-lg text-primary mb-2">Tahfidz Terintegrasi</h4>
+                    <p class="text-gray-600 text-sm">Program hafalan Al-Qur'an dan Hadits yang sistematis, menyenangkan, dan menyatu dalam rutinitas belajar.</p>
+                </div>
+                <!-- Item 5 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition border border-gray-100" data-aos="fade-up" data-aos-delay="300">
+                    <h4 class="font-bold text-lg text-primary mb-2">Wawasan Ilmu Global</h4>
+                    <p class="text-gray-600 text-sm">Kurikulum yang relevan dengan perkembangan zaman, memastikan siswa berwawasan luas dan berpikir kritis.</p>
+                </div>
+                <!-- Item 6 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition border border-gray-100" data-aos="fade-up" data-aos-delay="350">
+                    <h4 class="font-bold text-lg text-primary mb-2">Literasi Teknologi</h4>
+                    <p class="text-gray-600 text-sm">Pengenalan dan pemanfaatan teknologi secara positif, produktif, dan beretika di berbagai bidang.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Jadwal -->
+    <section id="jadwal" class="py-16 bg-primary text-white relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        <div class="container mx-auto px-4 text-center relative z-10" data-aos="zoom-in">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Pendaftaran Sudah Dibuka</h2>
+            <div class="inline-block bg-white/20 backdrop-blur-md rounded-2xl px-8 py-6 border border-white/30 mb-6">
+                <p class="text-2xl md:text-3xl font-extrabold text-accent">KOUTA TERBATAS</p>
+            </div>
+            <p class="text-teal-100 max-w-2xl mx-auto mb-8">Segera amankan kursi untuk ananda, karena kuota sangat terbatas demi menjaga kualitas pembinaan.</p>
+            <a href="#daftar" class="inline-block px-8 py-3 bg-white text-primary font-bold rounded-xl shadow-lg hover:bg-gray-100 transition transform hover:scale-105">Daftar dan Amankan Kursi Sekarang</a>
+        </div>
+    </section>
+
+    <!-- Formulir Pendaftaran Dinamis -->
+    <section id="daftar" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4 max-w-4xl">
+            <div class="text-center mb-10" data-aos="fade-up">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Bergabunglah dengan Keluarga Besar An-Najah</h2>
+                <p class="text-gray-600">Pendidikan terbaik untuk ananda ialah yang terbaik dalam adab dan tauhidnya.</p>
+            </div>
+
+            <div class="glass-effect rounded-2xl shadow-xl p-6 md:p-10 border border-gray-100" data-aos="fade-up" data-aos-delay="200">
+                <form id="pmbForm" class="space-y-6">
+                    <input type="hidden" id="unit" name="unit" value="TK">
+
+                    <!-- Unit Selection Tabs -->
+                    <div class="flex flex-wrap justify-center gap-4 mb-8">
+                        <button type="button" onclick="setUnit('TK')" id="btn-TK" class="unit-tab flex-1 min-w-[120px] px-6 py-3 rounded-xl font-bold transition-all duration-300 bg-primary text-white shadow-md">Unit TK</button>
+                        <button type="button" onclick="setUnit('SD')" id="btn-SD" class="unit-tab flex-1 min-w-[120px] px-6 py-3 rounded-xl font-bold transition-all duration-300 bg-white text-primary border-2 border-primary hover:bg-teal-50">Unit SD</button>
+                        <button type="button" onclick="setUnit('SMP')" id="btn-SMP" class="unit-tab flex-1 min-w-[120px] px-6 py-3 rounded-xl font-bold transition-all duration-300 bg-white text-primary border-2 border-primary hover:bg-teal-50">Unit SMP</button>
+                    </div>
+
+                    <!-- Data Pribadi Siswa -->
+                    <div class="border-b border-gray-200 pb-6 mb-6">
+                        <h3 class="text-xl font-bold text-secondary mb-4 flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                            Data Pribadi Siswa
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">NIK (Nomor Induk Kependudukan) <span class="text-red-500">*</span></label>
+                                <input type="text" id="nik" name="nik" required maxlength="16" pattern="\d{16}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition" placeholder="16 digit angka">
+                                <p class="text-xs text-gray-500 mt-1">NIK digunakan sebagai ID unik untuk mencegah duplikasi data.</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap Siswa <span class="text-red-500">*</span></label>
+                                <input type="text" id="nama" name="nama" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Tempat Lahir <span class="text-red-500">*</span></label>
+                                <input type="text" id="tempatLahir" name="tempatLahir" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Tanggal Lahir <span class="text-red-500">*</span></label>
+                                <input type="date" id="tanggalLahir" name="tanggalLahir" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Jenis Kelamin <span class="text-red-500">*</span></label>
+                                <select id="gender" name="gender" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition bg-white">
+                                    <option value="">Pilih...</option>
+                                    <option value="Laki-laki">Laki-laki</option>
+                                    <option value="Perempuan">Perempuan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Sekolah Asal <span class="text-red-500">*</span></label>
+                                <input type="text" id="sekolahAsal" name="sekolahAsal" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition" placeholder="Nama sekolah sebelumnya">
+                                <p class="text-xs text-gray-500 mt-1">isi tanda - bila tidak ada</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Field Dinamis -->
+                    <div id="dynamicFields" class="border-b border-gray-200 pb-6 mb-6 bg-teal-50/50 p-6 rounded-xl border border-teal-100">
+                        <!-- Diisi oleh JavaScript berdasarkan unit -->
+                    </div>
+
+                    <!-- Data Orang Tua & Alamat -->
+                    <div class="pb-2">
+                        <h3 class="text-xl font-bold text-secondary mb-4 flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                            Data Orang Tua & Alamat
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Ayah <span class="text-red-500">*</span></label>
+                                <input type="text" id="namaAyah" name="namaAyah" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">No. HP Ayah (WhatsApp) <span class="text-red-500">*</span></label>
+                                <input type="tel" id="noHpAyah" name="noHpAyah" required pattern="[0-9]{10,13}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition" placeholder="08xxxxxxxxxx">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Ibu <span class="text-red-500">*</span></label>
+                                <input type="text" id="namaIbu" name="namaIbu" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">No. HP Ibu (WhatsApp) <span class="text-red-500">*</span></label>
+                                <input type="tel" id="noHpIbu" name="noHpIbu" required pattern="[0-9]{10,13}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition" placeholder="08xxxxxxxxxx">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Alamat Lengkap <span class="text-red-500">*</span></label>
+                                <textarea id="alamat" name="alamat" rows="3" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition" placeholder="Nama jalan, RT/RW, Kelurahan, Kecamatan, Kab/Kota"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="text-center pt-6 border-t border-gray-200">
+                        <button type="submit" id="submitBtn" class="w-full md:w-auto px-12 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-secondary transform hover:scale-105 transition-all duration-300 flex items-center justify-center mx-auto text-lg">
+                            <span>Kirim Pendaftaran</span>
+                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
+                        <p class="text-xs text-gray-500 mt-4">Dengan mengirim formulir ini, Anda menyetujui pengolahan data untuk keperluan administrasi SPMB.</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+<!-- biaya daftar -->
+    
+<section id="biaya" class="py-16 bg-primary text-white relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+
+    <div class="container mx-auto px-4 text-center relative z-10" data-aos="zoom-in">
+
+        <h2 class="text-3xl md:text-4xl font-bold mb-3">
+            Biaya Pendaftaran
+        </h2>
+
+        <p class="text-white/80 mb-10">
+            Informasi biaya pendaftaran peserta didik baru
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+
+            <!-- BOX TK -->
+            <div class="bg-white text-gray-800 rounded-2xl p-8 shadow-xl hover:-translate-y-2 transition duration-300">
+                
+                <h3 class="text-2xl font-bold text-primary mb-5">TK</h3>
+                <p class="text-gray-500 text-sm mb-2">Biaya Pendaftaran</p>
+                <p class="text-1xl font-extrabold text-green-600">
+                    Rp 170.000
+                </p>
+            </div>
+
+            <!-- BOX SD -->
+            <div class="bg-white text-gray-800 rounded-2xl p-8 shadow-xl hover:-translate-y-2 transition duration-300">
+                
+                <h3 class="text-2xl font-bold text-primary mb-5">SD</h3>
+                <p class="text-gray-500 text-sm mb-2">Biaya Pendaftaran</p>
+                <p class="text-1xl font-extrabold text-green-600">
+                    Rp 200.000
+                </p>
+            </div>
+
+            <!-- BOX SMP -->
+            <div class="bg-white text-gray-800 rounded-2xl p-8 shadow-xl hover:-translate-y-2 transition duration-300">
+                
+                <h3 class="text-2xl font-bold text-primary mb-5">SMP</h3>
+
+                <div class="mb-5">
+                    <p class="text-gray-500 text-sm mb-2">Fullday</p>
+                    <p class="text-1xl font-extrabold text-green-600">
+                        Rp 250.000
+                    </p>
+                </div>
+
+                <div class="border-t border-gray-200 pt-5">
+                    <p class="text-gray-500 text-sm mb-2">Boarding</p>
+                    <p class="text-1xl font-extrabold text-green-600">
+                        Rp 350.000
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 py-12 border-t border-gray-800">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="https://i0.wp.com/annajahtakengon.sch.id/wp-content/uploads/2020/12/An-Najah-min.png?resize=300%2C298&ssl=1" alt="Logo Footer" class="h-12 bg-white rounded p-1">
+                        <div>
+                            <h3 class="font-bold text-white text-lg">Yayasan An-Najah Ihya As Sunnah</h3>
+                            <p class="text-sm text-gray-400">Mencetak generasi tauhid yang beradab mulia.</p>
+                        </div>
+                    </div>
+                    <p class="text-sm leading-relaxed text-gray-400">
+                        Mencetak generasi tauhid yang beradab mulia, cinta Al-Qur'an dan sunnah, mandiri dan berprestasi.
+                    </p>
+                </div>
+                <div class="md:text-right">
+                    <h4 class="font-bold text-white mb-4">Butuh bantuan atau konsultasi?</h4>
+                    <a href="https://wa.me/6282251090446?text=Assalamu'alaikum,%20saya%20ingin%20bertanya%20tentang%20SPMB%20Sekolah%20An-Najah" target="_blank" class="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition shadow-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        Chat WhatsApp dengan Admin
+                    </a>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
+                <p>&copy; 2026 Sekolah Sunnah An-Najah. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Inisialisasi animasi scroll
+        AOS.init({ duration: 800, once: true, offset: 100 });
+
+        // =====================================================================
+        // KONFIGURASI: Ganti dengan URL Web App Google Apps Script Anda
+        // =====================================================================
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbxdA_hyooAzbjophIFd-JTAwSagrAKYpmwrPqzN9TUzP2ZCa1h4E3WfCzr_WZSyTWhz/exec';
+
+        let currentUnit = 'TK';
+
+        // Fungsi untuk mengganti unit dan merender field dinamis
+        function setUnit(unit) {
+            currentUnit = unit;
+            document.getElementById('unit').value = unit;
+            
+            // Update style tombol tab
+            document.querySelectorAll('.unit-tab').forEach(btn => {
+                btn.className = 'unit-tab flex-1 min-w-[120px] px-6 py-3 rounded-xl font-bold transition-all duration-300 bg-white text-primary border-2 border-primary hover:bg-teal-50';
+            });
+            document.getElementById(`btn-${unit}`).className = 'unit-tab flex-1 min-w-[120px] px-6 py-3 rounded-xl font-bold transition-all duration-300 bg-primary text-white shadow-md transform scale-105';
+
+            // Render field dinamis sesuai unit
+            const dynamicContainer = document.getElementById('dynamicFields');
+            if (unit === 'TK') {
+                dynamicContainer.innerHTML = `
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Pilihan Kelas <span class="text-red-500">*</span></label>
+                        <select id="pilihanKelas" name="pilihanKelas" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary bg-white">
+                            <option value="">Pilih Kelas...</option>
+                            <option value="TK-A">TK - A</option>
+                            <option value="TK-B">TK - B</option>
+                        </select>
+                    </div>`;
+            } else if (unit === 'SMP') {
+                dynamicContainer.innerHTML = `
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Pilihan Program <span class="text-red-500">*</span></label>
+                        <select id="pilihanProgram" name="pilihanProgram" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary bg-white">
+                            <option value="">Pilih Program...</option>
+                            <option value="Fullday">SMP Fullday</option>
+                            <option value="Boarding">SMP Boarding</option>
+                        </select>
+                    </div>`;
+            } else {
+                dynamicContainer.innerHTML = `
+                    <div class="text-sm text-gray-600 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Untuk Unit SD, tidak ada pilihan program khusus. Data akan diproses sebagai reguler.
+                    </div>`;
+            }
+        }
+
+        // Inisialisasi awal form
+        setUnit('TK');
+
+        // Handle Form Submission
+        document.getElementById('pmbForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            // Tampilkan loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses Data...`;
+
+            // Kumpulkan data form
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    // Popup Berhasil dengan opsi ke WhatsApp Group
+                    Swal.fire({
+                        title: 'Alhamdulillah, Pendaftaran Berhasil! 🎉',
+                        text: 'Data ananda telah tersimpan dengan aman. Silakan bergabung ke grup WhatsApp sesuai unit pendaftaran untuk informasi selanjutnya.',
+                        icon: 'success',
+                        confirmButtonText: 'Gabung Grup WhatsApp',
+                        confirmButtonColor: '#25D366',
+                        showCancelButton: true,
+                        cancelButtonText: 'Kembali ke Beranda',
+                        cancelButtonColor: '#0f766e'
+                    }).then((willJoin) => {
+                        if (willJoin.isConfirmed) {
+                            window.open(result.waLink, '_blank');
+                        }
+                        // Reset form dan kembalikan ke unit TK
+                        this.reset();
+                        setUnit('TK');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                } else {
+                    throw new Error(result.message || 'Terjadi kesalahan pada server.');
+                }
+            } catch (error) {
+                // Popup Gagal dengan opsi ke WhatsApp Panitia
+                Swal.fire({
+                    title: 'Pendaftaran Gagal',
+                    text: error.message + ' Silakan coba lagi atau hubungi panitia untuk bantuan.',
+                    icon: 'error',
+                    confirmButtonText: 'Hubungi Panitia via WhatsApp',
+                    confirmButtonColor: '#dc2626',
+                    showCancelButton: true,
+                    cancelButtonText: 'Kembali ke Beranda',
+                    cancelButtonColor: '#0f766e'
+                }).then((willContact) => {
+                    if (willContact.isConfirmed) {
+                        window.open('https://wa.me/6282251090446?text=Assalamu\'alaikum%20Panitia%20PMB,%20saya%20mengalami%20kendala%20saat%20pendaftaran%20online.', '_blank');
+                    }
+                });
+            } finally {
+                // Kembalikan tombol ke keadaan semula
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+        });
+    </script>
+</body>
+</html>
