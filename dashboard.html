@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin SPMB 2027/2028</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Login Overlay -->
+    <div id="loginOverlay" class="fixed inset-0 bg-teal-900 bg-opacity-95 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full text-center">
+            <h2 class="text-2xl font-bold text-teal-800 mb-4">Akses Dashboard Admin</h2>
+            <input type="password" id="adminPass" placeholder="Masukkan Password" class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-teal-500">
+            <button onclick="checkLogin()" class="w-full bg-teal-600 text-white font-bold py-3 rounded-lg hover:bg-teal-700 transition">Masuk</button>
+        </div>
+    </div>
+
+    <!-- Main Dashboard (Hidden by default) -->
+    <div id="dashboardContent" class="hidden container mx-auto px-4 py-8">
+        <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-md">
+            <div>
+                <h1 class="text-2xl font-bold text-teal-800">Dashboard Penerimaan Murid Baru</h1>
+                <p class="text-gray-500">Tahun Ajaran 2027/2028 - Yayasan An-Najah Ihya As-Sunnah</p>
+            </div>
+            <button onclick="logout()" class="text-red-600 font-semibold hover:text-red-800">Logout</button>
+        </header>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8" id="statsContainer">
+            <!-- Diisi oleh JS -->
+        </div>
+
+        <!-- Data Tables -->
+        <div class="space-y-8" id="tablesContainer">
+            <!-- Diisi oleh JS -->
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init();
+        // GANTI DENGAN URL WEB APP ANDA YANG SAMA
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbxdA_hyooAzbjophIFd-JTAwSagrAKYpmwrPqzN9TUzP2ZCa1h4E3WfCzr_WZSyTWhz/exec';
+        const ADMIN_PASSWORD = 'admin2728'; // Harus sama dengan di Code.gs
+
+        function checkLogin() {
+            const pass = document.getElementById('adminPass').value;
+            if (pass === ADMIN_PASSWORD) {
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('dashboardContent').classList.remove('hidden');
+                loadData();
+            } else {
+                Swal.fire('Error', 'Password salah!', 'error');
+            }
+        }
+
+        function logout() {
+            location.reload();
+        }
+
+        async function loadData() {
+            Swal.fire({ title: 'Memuat Data...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            
+            try {
+                const response = await fetch(`${GAS_URL}?action=getDashboard&password=${ADMIN_PASSWORD}`);
+                const data = await response.json();
+                
+                if (data.error) throw new Error(data.error);
+
+                // Render Stats
+                const statsHtml = `
+                    <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-teal-500" data-aos="fade-up">
+                        <h3 class="text-gray-500 text-sm font-semibold">TOTAL PENDAFTAR</h3>
+                        <p class="text-4xl font-bold text-teal-800 mt-2">${data.total}</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-blue-500" data-aos="fade-up" data-aos-delay="100">
+                        <h3 class="text-gray-500 text-sm font-semibold">UNIT TK</h3>
+                        <p class="text-4xl font-bold text-blue-800 mt-2">${data.details.TK ? data.details.TK.count : 0}</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-green-500" data-aos="fade-up" data-aos-delay="200">
+                        <h3 class="text-gray-500 text-sm font-semibold">UNIT SD</h3>
+                        <p class="text-4xl font-bold text-green-800 mt-2">${data.details.SD ? data.details.SD.count : 0}</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-purple-500" data-aos="fade-up" data-aos-delay="300">
+                        <h3 class="text-gray-500 text-sm font-semibold">UNIT SMP</h3>
+                        <p class="text-4xl font-bold text-purple-800 mt-2">${data.details.SMP ? data.details.SMP.count : 0}</p>
+                    </div>
+                `;
+                document.getElementById('statsContainer').innerHTML = statsHtml;
+
+                // Render Tables
+                let tablesHtml = '';
+                ['TK', 'SD', 'SMP'].forEach(unit => {
+                    const unitData = data.details[unit];
+                    if (unitData && unitData.data.length > 0) {
+                        const headers = Object.keys(unitData.data[0]);
+                        let rows = unitData.data.map(row => `
+                            <tr class="border-b hover:bg-gray-50">
+                                ${headers.map(h => `<td class="px-4 py-3 text-sm">${row[h] || '-'}</td>`).join('')}
+                            </tr>
+                        `).join('');
+                        
+                        tablesHtml += `
+                            <div class="bg-white rounded-xl shadow-md overflow-hidden" data-aos="fade-up">
+                                <div class="bg-teal-700 text-white px-6 py-4 font-bold flex justify-between">
+                                    <span>Data Pendaftar ${unit} (10 Terakhir)</span>
+                                    <span class="bg-teal-600 px-3 py-1 rounded-full text-sm">${unitData.count} Total</span>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left">
+                                        <thead class="bg-gray-50 text-gray-600 text-sm uppercase">
+                                            <tr>${headers.map(h => `<th class="px-4 py-3">${h}</th>`).join('')}</tr>
+                                        </thead>
+                                        <tbody class="text-gray-700">${rows}</tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        tablesHtml += `
+                            <div class="bg-white rounded-xl shadow-md p-8 text-center text-gray-500" data-aos="fade-up">
+                                Belum ada data pendaftar untuk Unit ${unit}.
+                            </div>
+                        `;
+                    }
+                });
+                document.getElementById('tablesContainer').innerHTML = tablesHtml;
+                Swal.close();
+
+            } catch (error) {
+                Swal.fire('Gagal Memuat', error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
