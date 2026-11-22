@@ -3,49 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin SPMB 2027/2028</title>
+    <title>Dashboard Admin PMB 2027/2028 | An-Najah</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Chart.js untuk Grafik -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .glass-effect { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+    </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-gray-100 text-gray-800 font-sans">
 
     <!-- Login Overlay -->
     <div id="loginOverlay" class="fixed inset-0 bg-teal-900 bg-opacity-95 flex items-center justify-center z-50">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full text-center">
-            <h2 class="text-2xl font-bold text-teal-800 mb-4">Akses Dashboard Admin</h2>
-            <input type="password" id="adminPass" placeholder="Masukkan Password" class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-teal-500">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full text-center" data-aos="zoom-in">
+            <h2 class="text-2xl font-bold text-teal-800 mb-2">Dashboard Admin</h2>
+            <p class="text-gray-500 mb-6 text-sm">Yayasan An-Najah Ihya As-Sunnah</p>
+            <input type="password" id="adminPass" placeholder="Masukkan Password" class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-teal-500 outline-none">
             <button onclick="checkLogin()" class="w-full bg-teal-600 text-white font-bold py-3 rounded-lg hover:bg-teal-700 transition">Masuk</button>
         </div>
     </div>
 
-    <!-- Main Dashboard (Hidden by default) -->
-    <div id="dashboardContent" class="hidden container mx-auto px-4 py-8">
-        <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-md">
-            <div>
-                <h1 class="text-2xl font-bold text-teal-800">Dashboard Penerimaan Murid Baru</h1>
-                <p class="text-gray-500">Tahun Ajaran 2027/2028 - Yayasan An-Najah Ihya As-Sunnah</p>
+    <!-- Main Dashboard -->
+    <div id="dashboardContent" class="hidden min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm sticky top-0 z-40">
+            <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-teal-800">Dashboard Penerimaan Murid Baru</h1>
+                    <p class="text-xs md:text-sm text-gray-500">Tahun Ajaran 2027/2028</p>
+                </div>
+                <button onclick="logout()" class="text-red-600 font-semibold hover:text-red-800 text-sm bg-red-50 px-4 py-2 rounded-lg transition">Logout</button>
             </div>
-            <button onclick="logout()" class="text-red-600 font-semibold hover:text-red-800">Logout</button>
         </header>
 
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8" id="statsContainer">
-            <!-- Diisi oleh JS -->
-        </div>
+        <div class="container mx-auto px-4 py-8">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" id="statsContainer">
+                <!-- Diisi oleh JS -->
+            </div>
 
-        <!-- Data Tables -->
-        <div class="space-y-8" id="tablesContainer">
-            <!-- Diisi oleh JS -->
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-md" data-aos="fade-up">
+                    <h3 class="font-bold text-gray-700 mb-4 text-center">Distribusi Pendaftar per Unit</h3>
+                    <div class="relative h-64">
+                        <canvas id="unitChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md" data-aos="fade-up" data-aos-delay="100">
+                    <h3 class="font-bold text-gray-700 mb-4 text-center">Distribusi Gender</h3>
+                    <div class="relative h-64">
+                        <canvas id="genderChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter & Controls -->
+            <div class="bg-white p-6 rounded-xl shadow-md mb-6" data-aos="fade-up">
+                <div class="flex flex-col md:flex-row justify-between items-end md:items-center gap-4">
+                    <div class="flex flex-wrap gap-4 w-full md:w-auto">
+                        <!-- Filter Unit -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Filter Unit</label>
+                            <select id="filterUnit" onchange="handleUnitFilterChange()" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none bg-white text-sm">
+                                <option value="ALL">Semua Unit</option>
+                                <option value="TK">Unit TK</option>
+                                <option value="SD">Unit SD</option>
+                                <option value="SMP">Unit SMP</option>
+                            </select>
+                        </div>
+                        <!-- Filter Sub (Dinamis) -->
+                        <div id="subFilterContainer" class="hidden">
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Filter Program/Kelas</label>
+                            <select id="filterSub" onchange="applyFilters()" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none bg-white text-sm">
+                                <option value="ALL">Semua Program</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Pagination Controls -->
+                    <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-gray-600">Tampilkan:</span>
+                            <select id="rowsPerPage" onchange="changeRowsPerPage()" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 outline-none bg-white">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                            <span class="text-sm text-gray-600">data</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden" data-aos="fade-up">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-teal-50 text-teal-800 text-sm uppercase font-semibold">
+                            <tr id="tableHeaders">
+                                <!-- Diisi oleh JS -->
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="text-gray-700 text-sm divide-y divide-gray-100">
+                            <!-- Diisi oleh JS -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination Footer -->
+                <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <span id="pageInfo" class="text-sm text-gray-600">Menampilkan 0 dari 0 data</span>
+                    <div class="flex gap-2">
+                        <button onclick="prevPage()" id="btnPrev" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition">Previous</button>
+                        <button onclick="nextPage()" id="btnNext" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition">Next</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        AOS.init();
-        // GANTI DENGAN URL WEB APP ANDA YANG SAMA
-        const GAS_URL = 'https://script.google.com/macros/s/AKfycbxdA_hyooAzbjophIFd-JTAwSagrAKYpmwrPqzN9TUzP2ZCa1h4E3WfCzr_WZSyTWhz/exec';
-        const ADMIN_PASSWORD = 'admin2728'; // Harus sama dengan di Code.gs
+        AOS.init({ duration: 600, once: true });
+
+        // =====================================================================
+        // KONFIGURASI: Ganti dengan URL Web App dan Password Anda
+        // =====================================================================
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbyo0Rzh7Uw_-tJCaGXM_VDrJozPiblU8B25-0_HSaDVoJSwREduiZpmBN4nF9IHgBhKvw/exec';
+        const ADMIN_PASSWORD = 'admin2728';
+
+        // State Management
+        let allData = []; // Menyimpan semua data mentah
+        let filteredData = []; // Menyimpan data setelah difilter
+        let currentPage = 1;
+        let rowsPerPage = 10;
+        let currentUnit = 'ALL';
+        let unitChartInstance = null;
+        let genderChartInstance = null;
 
         function checkLogin() {
             const pass = document.getElementById('adminPass').value;
@@ -62,6 +160,20 @@
             location.reload();
         }
 
+        // Fungsi Format Tanggal ke Bahasa Indonesia (DD MMM YYYY, HH:MM)
+        function formatDate(dateString) {
+            if (!dateString || dateString === '-') return '-';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('id-ID', { 
+                    day: '2-digit', month: 'short', year: 'numeric', 
+                    hour: '2-digit', minute: '2-digit' 
+                });
+            } catch (e) {
+                return dateString; // Fallback jika bukan format tanggal valid
+            }
+        }
+
         async function loadData() {
             Swal.fire({ title: 'Memuat Data...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             
@@ -71,69 +183,234 @@
                 
                 if (data.error) throw new Error(data.error);
 
-                // Render Stats
-                const statsHtml = `
-                    <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-teal-500" data-aos="fade-up">
-                        <h3 class="text-gray-500 text-sm font-semibold">TOTAL PENDAFTAR</h3>
-                        <p class="text-4xl font-bold text-teal-800 mt-2">${data.total}</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-blue-500" data-aos="fade-up" data-aos-delay="100">
-                        <h3 class="text-gray-500 text-sm font-semibold">UNIT TK</h3>
-                        <p class="text-4xl font-bold text-blue-800 mt-2">${data.details.TK ? data.details.TK.count : 0}</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-green-500" data-aos="fade-up" data-aos-delay="200">
-                        <h3 class="text-gray-500 text-sm font-semibold">UNIT SD</h3>
-                        <p class="text-4xl font-bold text-green-800 mt-2">${data.details.SD ? data.details.SD.count : 0}</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-purple-500" data-aos="fade-up" data-aos-delay="300">
-                        <h3 class="text-gray-500 text-sm font-semibold">UNIT SMP</h3>
-                        <p class="text-4xl font-bold text-purple-800 mt-2">${data.details.SMP ? data.details.SMP.count : 0}</p>
-                    </div>
-                `;
-                document.getElementById('statsContainer').innerHTML = statsHtml;
+                // Gabungkan semua data dari berbagai unit ke dalam satu array dengan penanda 'unit'
+                allData = [];
+                let totalTK = 0, totalSD = 0, totalSMP = 0;
 
-                // Render Tables
-                let tablesHtml = '';
                 ['TK', 'SD', 'SMP'].forEach(unit => {
-                    const unitData = data.details[unit];
-                    if (unitData && unitData.data.length > 0) {
-                        const headers = Object.keys(unitData.data[0]);
-                        let rows = unitData.data.map(row => `
-                            <tr class="border-b hover:bg-gray-50">
-                                ${headers.map(h => `<td class="px-4 py-3 text-sm">${row[h] || '-'}</td>`).join('')}
-                            </tr>
-                        `).join('');
-                        
-                        tablesHtml += `
-                            <div class="bg-white rounded-xl shadow-md overflow-hidden" data-aos="fade-up">
-                                <div class="bg-teal-700 text-white px-6 py-4 font-bold flex justify-between">
-                                    <span>Data Pendaftar ${unit} (10 Terakhir)</span>
-                                    <span class="bg-teal-600 px-3 py-1 rounded-full text-sm">${unitData.count} Total</span>
-                                </div>
-                                <div class="overflow-x-auto">
-                                    <table class="w-full text-left">
-                                        <thead class="bg-gray-50 text-gray-600 text-sm uppercase">
-                                            <tr>${headers.map(h => `<th class="px-4 py-3">${h}</th>`).join('')}</tr>
-                                        </thead>
-                                        <tbody class="text-gray-700">${rows}</tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        tablesHtml += `
-                            <div class="bg-white rounded-xl shadow-md p-8 text-center text-gray-500" data-aos="fade-up">
-                                Belum ada data pendaftar untuk Unit ${unit}.
-                            </div>
-                        `;
+                    if (data.details[unit] && data.details[unit].data) {
+                        const unitTotal = data.details[unit].count;
+                        if (unit === 'TK') totalTK = unitTotal;
+                        if (unit === 'SD') totalSD = unitTotal;
+                        if (unit === 'SMP') totalSMP = unitTotal;
+
+                        data.details[unit].data.forEach(row => {
+                            row._unit = unit; // Tambahkan properti internal untuk filtering
+                            allData.push(row);
+                        });
                     }
                 });
-                document.getElementById('tablesContainer').innerHTML = tablesHtml;
+
+                // Update Stats Cards
+                document.getElementById('statsContainer').innerHTML = `
+                    <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-teal-500" data-aos="fade-up">
+                        <h3 class="text-gray-500 text-xs font-bold uppercase">Total Pendaftar</h3>
+                        <p class="text-3xl font-extrabold text-teal-800 mt-1">${data.total}</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-blue-500" data-aos="fade-up" data-aos-delay="100">
+                        <h3 class="text-gray-500 text-xs font-bold uppercase">Unit TK</h3>
+                        <p class="text-3xl font-extrabold text-blue-800 mt-1">${totalTK}</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-green-500" data-aos="fade-up" data-aos-delay="200">
+                        <h3 class="text-gray-500 text-xs font-bold uppercase">Unit SD</h3>
+                        <p class="text-3xl font-extrabold text-green-800 mt-1">${totalSD}</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-purple-500" data-aos="fade-up" data-aos-delay="300">
+                        <h3 class="text-gray-500 text-xs font-bold uppercase">Unit SMP</h3>
+                        <p class="text-3xl font-extrabold text-purple-800 mt-1">${totalSMP}</p>
+                    </div>
+                `;
+
+                // Inisialisasi filter dan render awal
+                applyFilters();
                 Swal.close();
 
             } catch (error) {
                 Swal.fire('Gagal Memuat', error.message, 'error');
             }
+        }
+
+        // --- LOGIKA FILTER ---
+        function handleUnitFilterChange() {
+            currentUnit = document.getElementById('filterUnit').value;
+            const subFilterContainer = document.getElementById('subFilterContainer');
+            const subFilterSelect = document.getElementById('filterSub');
+            
+            subFilterSelect.innerHTML = '<option value="ALL">Semua Program</option>';
+            
+            if (currentUnit === 'TK') {
+                subFilterContainer.classList.remove('hidden');
+                subFilterSelect.innerHTML += '<option value="TK-A">TK - A</option><option value="TK-B">TK - B</option>';
+            } else if (currentUnit === 'SMP') {
+                subFilterContainer.classList.remove('hidden');
+                subFilterSelect.innerHTML += '<option value="Fullday">SMP Fullday</option><option value="Boarding">SMP Boarding</option>';
+            } else {
+                subFilterContainer.classList.add('hidden');
+            }
+            
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const subFilter = document.getElementById('filterSub').value;
+            
+            filteredData = allData.filter(row => {
+                if (currentUnit !== 'ALL' && row._unit !== currentUnit) return false;
+                
+                if (currentUnit === 'TK' && subFilter !== 'ALL') {
+                    // Asumsi nama kolom di sheet adalah 'Pilihan Kelas'
+                    return row['Pilihan Kelas'] === subFilter;
+                }
+                if (currentUnit === 'SMP' && subFilter !== 'ALL') {
+                    // Asumsi nama kolom di sheet adalah 'Pilihan Program'
+                    return row['Pilihan Program'] === subFilter;
+                }
+                return true;
+            });
+
+            currentPage = 1; // Reset ke halaman 1 setiap filter berubah
+            renderTable();
+            updateCharts();
+        }
+
+        // --- LOGIKA PAGINATION ---
+        function changeRowsPerPage() {
+            rowsPerPage = parseInt(document.getElementById('rowsPerPage').value);
+            currentPage = 1;
+            renderTable();
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+            }
+        }
+
+        // --- LOGIKA RENDER ---
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const thead = document.getElementById('tableHeaders');
+            tbody.innerHTML = '';
+            thead.innerHTML = '';
+
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="100%" class="text-center py-8 text-gray-500">Tidak ada data yang sesuai dengan filter.</td></tr>`;
+                document.getElementById('pageInfo').textContent = 'Menampilkan 0 dari 0 data';
+                document.getElementById('btnPrev').disabled = true;
+                document.getElementById('btnNext').disabled = true;
+                return;
+            }
+
+            // Ambil header dari data pertama (abaikan properti internal '_unit')
+            const firstRow = filteredData[0];
+            const headers = Object.keys(firstRow).filter(key => key !== '_unit');
+            
+            // Render Header
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.className = 'px-6 py-4 whitespace-nowrap';
+                th.textContent = header.replace(/_/g, ' '); // Rapikan nama header
+                thead.appendChild(th);
+            });
+
+            // Hitung slice untuk pagination
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = Math.min(startIndex + rowsPerPage, filteredData.length);
+            const pageData = filteredData.slice(startIndex, endIndex);
+
+            // Render Rows
+            pageData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-teal-50/50 transition-colors';
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.className = 'px-6 py-4 whitespace-nowrap border-b border-gray-100';
+                    
+                    // Format khusus untuk kolom tanggal
+                    if (header.toLowerCase().includes('timestamp') || header.toLowerCase().includes('tanggal')) {
+                        td.textContent = formatDate(row[header]);
+                    } else {
+                        td.textContent = row[header] !== undefined && row[header] !== null ? row[header] : '-';
+                    }
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+
+            // Update Pagination Info
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            document.getElementById('pageInfo').textContent = `Menampilkan ${startIndex + 1} - ${endIndex} dari ${filteredData.length} data (Halaman ${currentPage} dari ${totalPages})`;
+            document.getElementById('btnPrev').disabled = currentPage === 1;
+            document.getElementById('btnNext').disabled = currentPage === totalPages;
+        }
+
+        // --- LOGIKA CHART ---
+        function updateCharts() {
+            // 1. Chart Distribusi Unit (Donut)
+            const unitCounts = { 'TK': 0, 'SD': 0, 'SMP': 0 };
+            filteredData.forEach(row => {
+                if (unitCounts[row._unit] !== undefined) unitCounts[row._unit]++;
+            });
+
+            const ctxUnit = document.getElementById('unitChart').getContext('2d');
+            if (unitChartInstance) unitChartInstance.destroy();
+            
+            unitChartInstance = new Chart(ctxUnit, {
+                type: 'doughnut',
+                data: {
+                    labels: ['TK', 'SD', 'SMP'],
+                    datasets: [{
+                        data: [unitCounts['TK'], unitCounts['SD'], unitCounts['SMP']],
+                        backgroundColor: ['#3b82f6', '#22c55e', '#a855f7'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // 2. Chart Distribusi Gender (Bar)
+            const genderCounts = { 'Laki-laki': 0, 'Perempuan': 0 };
+            filteredData.forEach(row => {
+                const gender = row['Gender'] || row['gender']; // Handle variasi kapitalisasi
+                if (gender && genderCounts[gender] !== undefined) {
+                    genderCounts[gender]++;
+                }
+            });
+
+            const ctxGender = document.getElementById('genderChart').getContext('2d');
+            if (genderChartInstance) genderChartInstance.destroy();
+
+            genderChartInstance = new Chart(ctxGender, {
+                type: 'bar',
+                data: {
+                    labels: ['Laki-laki', 'Perempuan'],
+                    datasets: [{
+                        label: 'Jumlah Pendaftar',
+                        data: [genderCounts['Laki-laki'], genderCounts['Perempuan']],
+                        backgroundColor: ['#0ea5e9', '#ec4899'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
         }
     </script>
 </body>
