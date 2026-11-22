@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lembar Isian Observasi PPDB - SMPIT Dar An Najah</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--g9:#0b3d33;--g7:#13604f;--g1:#e3f1ec;--gold:#c8962e;--bg:#f2f6f4;--ink:#16211e;--mut:#5d6b66;--line:#d5e0db;--err:#c0392b;--r:14px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 'Plus Jakarta Sans',system-ui,sans-serif}
+.hero{background:var(--g9);color:#fff;padding:36px 20px 84px;text-align:center;background-image:radial-gradient(circle at 85% 0,rgba(200,150,46,.25),transparent 45%)}
+.hero .bis{font:400 25px/1.3 'Amiri',serif;color:var(--gold)}
+.hero small{display:block;opacity:.75;font-size:13px;letter-spacing:.02em}
+.hero h1{margin:8px 0 6px;font-size:clamp(24px,5vw,34px);font-weight:800;letter-spacing:-.02em}
+.hero p{margin:0 auto;max-width:560px;opacity:.85;font-size:14px}
+.wrap{max-width:760px;margin:-56px auto 48px;padding:0 14px}
+.card{background:#fff;border-radius:20px;box-shadow:0 10px 40px rgba(11,61,51,.12);overflow:hidden}
+.prog{padding:20px 24px 16px;border-bottom:1px solid var(--line)}
+.prog .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:13px;color:var(--mut);font-weight:600}
+.bar{height:8px;background:var(--g1);border-radius:99px;margin-top:10px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--g7),var(--gold));border-radius:99px;transition:width .35s}
+.step{display:none;padding:26px 24px 8px}
+.step.on{display:block;animation:in .25s ease}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.step h2{margin:0 0 4px;font-size:21px;font-weight:800;color:var(--g9);letter-spacing:-.01em}
+.step>p{margin:0 0 22px;color:var(--mut);font-size:14px}
+.f{margin-bottom:22px}
+.q{display:block;font-weight:600;margin-bottom:8px;font-size:15px}
+.q em{font-style:normal;color:var(--g7);margin-right:6px}
+.q b{color:var(--err);margin-left:3px}
+input[type=text],input[type=tel],input[type=number],textarea,select{width:100%;font:inherit;color:inherit;background:#fbfdfc;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;transition:border-color .15s,box-shadow .15s}
+textarea{resize:vertical;min-height:88px}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--g7);box-shadow:0 0 0 4px rgba(19,96,79,.14)}
+.f.bad input,.f.bad textarea{border-color:var(--err)}
+.msg{display:none;color:var(--err);font-size:13px;margin-top:6px}
+.f.bad .msg{display:block}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip span{display:inline-block;padding:9px 16px;border:1.5px solid var(--line);border-radius:99px;cursor:pointer;font-weight:500;font-size:14.5px;background:#fbfdfc;transition:all .15s}
+.chip input:checked+span{background:var(--g7);border-color:var(--g7);color:#fff}
+.chip input:focus-visible+span{box-shadow:0 0 0 4px rgba(19,96,79,.25)}
+.f.sub{margin:-10px 0 22px}
+.f.sub input{font-size:14px;padding:10px 14px}
+.f[hidden]{display:none}
+.rp{display:flex;align-items:center;gap:8px}
+.rp span{font-weight:600;color:var(--mut)}
+.nav{display:flex;gap:12px;padding:18px 24px 24px;border-top:1px solid var(--line);margin-top:8px;background:#fafcfb}
+.btn{font:inherit;font-weight:700;border:0;border-radius:12px;padding:14px 22px;cursor:pointer;transition:transform .1s,background .15s}
+.btn:active{transform:scale(.98)}
+.btn.p{background:var(--g7);color:#fff;flex:1}
+.btn.p:hover{background:var(--g9)}
+.btn.s{background:var(--g1);color:var(--g9)}
+.btn:disabled{opacity:.6;cursor:wait}
+.done{display:none;text-align:center;padding:56px 28px}
+.done .ck{width:72px;height:72px;margin:0 auto 18px;border-radius:50%;background:var(--g1);display:grid;place-items:center}
+.done h2{margin:0 0 8px;color:var(--g9)}
+.done p{color:var(--mut);margin:0 0 22px}
+.top{display:flex;justify-content:center;margin-top:14px}
+.link{background:none;border:0;color:var(--mut);font:inherit;font-size:13px;text-decoration:underline;cursor:pointer}
+.ov{position:fixed;inset:0;background:rgba(11,61,51,.55);backdrop-filter:blur(3px);display:grid;place-items:center;padding:20px;z-index:50}
+.ov[hidden]{display:none}
+.dlg{background:#fff;border-radius:22px;max-width:400px;width:100%;padding:30px 24px 24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:in .2s ease}
+.dlg h3{margin:14px 0 6px;font-size:20px;font-weight:800;color:var(--g9)}
+.dlg p{margin:0 0 20px;color:var(--mut);font-size:14.5px}
+.ic{width:64px;height:64px;border-radius:50%;margin:0 auto;display:grid;place-items:center;background:var(--g1)}
+.ic.bad{background:#fbe6e3}
+.ic.load i{width:30px;height:30px;border:4px solid #bcd8cf;border-top-color:var(--g7);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.acts{display:flex;flex-direction:column;gap:10px}
+.acts:empty{display:none}
+.btn.wa{background:#1fa855;color:#fff}
+.btn.wa:hover{background:#178a45}
+@media(max-width:520px){.step{padding:22px 18px 4px}.nav{padding:16px 18px 20px}.prog{padding:18px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{body{background:#fff}.hero{background:#fff;color:#000;padding:0 0 10px}.hero p,.prog,.nav,.top{display:none}.wrap{margin:0;max-width:none}.card{box-shadow:none}.step{display:block!important;break-inside:avoid-page}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="bis">﷽</div>
+  <small>Yayasan An-Najah Ihya As-Sunnah</small>
+  <h1>Lembar Isian Observasi</h1>
+  <p>PPDB SMPIT Dar An Najah Islamic Boarding School Takengon</p>
+</header>
+
+<main class="wrap">
+  <form class="card" id="form" novalidate>
+    <div class="prog">
+      <div class="row"><span id="stepName"></span><span id="stepNum"></span></div>
+      <div class="bar"><i id="bar"></i></div>
+    </div>
+    <div id="steps"></div>
+    <div class="nav">
+      <button type="button" class="btn s" id="back">Kembali</button>
+      <button type="button" class="btn p" id="next">Lanjut</button>
+    </div>
+  </form>
+  <section class="card done" id="done">
+    <div class="ck"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#13604f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+    <h2>Jazakumullahu khairan</h2>
+    <p>Data sudah kami terima. Halaman ini sudah boleh ditutup. Tim PPDB akan menghubungi Ayah/Bunda untuk tahap berikutnya.</p>
+    <button class="btn s" onclick="location.reload()">Isi formulir baru</button>
+  </section>
+  <div class="ov" id="ov" hidden>
+    <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dT" aria-live="polite">
+      <div class="ic" id="dI"></div>
+      <h3 id="dT"></h3>
+      <p id="dM"></p>
+      <div class="acts" id="dA"></div>
+    </div>
+  </div>
+  <div class="top"><button class="link" type="button" onclick="window.print()">Cetak formulir kosong</button></div>
+</main>
+
+<script>
+// ====== PENGATURAN: tempel URL Web App Google Apps Script di sini ======
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw7kgMbf-Yz61XHGlG_Y-6h_V4GKxvHmJTWAl6V4PIOLOclJiOIj-LinxEmnTCSkPLGug/exec';
+
+const SB = ['Bersedia', 'Tidak Bersedia'];
+// field: [key, label, type, options, required, dependsOn]
+// type: t=teks, p=telepon, a=paragraf, r=pilihan, s=dropdown, n=angka, o=teks tambahan (tanpa nomor)
+const S = [
+{t:'Data pengisi', d:'Agar jawaban dapat dikenali oleh tim PPDB.', f:[
+ ['nama_ananda','Nama lengkap ananda','t',0,1],
+ ['nama_ortu','Nama Ayah/Bunda/Wali','t',0,1],
+ ['no_hp','Nomor WhatsApp yang bisa dihubungi','p',0,1]]},
+{t:'I. Latar belakang dan harapan', d:'Cerita singkat tentang alasan Ayah/Bunda memilih kami.', f:[
+ ['sumber_info','Dari mana Ayah/Bunda tahu mengenai PPDB di Dar An Najah Islamic Boarding School Takengon?','r',['Spanduk','Teman','Guru/Karyawan','Tetangga','Media Sosial']],
+ ['sumber_info_lain','Lainnya (sebutkan)','o'],
+ ['alasan_utama','Alasan utama Ayah/Bunda memilih Dar An Najah Islamic Boarding School Takengon?','a'],
+ ['harapan_tamat','Apa harapan Ayah/Bunda terhadap kemampuan ananda setelah tamat dari sekolah ini?','a']]},
+{t:'II. Kronologi 0 - 12 tahun', d:'Mengenal ananda sejak kecil.', f:[
+ ['nama_panggilan','Apa nama panggilan yang ananda sukai?','t'],
+ ['arti_nama','Apa arti atau makna nama yang Ayah/Bunda berikan kepada ananda?','a'],
+ ['kenangan_kelahiran','Apa kenangan paling berharga dalam proses kelahiran ananda?','a'],
+ ['kendala_sd','Apa kendala yang Ayah/Bunda hadapi dalam pembelajaran ananda semasa SD?','a'],
+ ['panggilan_sekolah','Pernahkah Ayah/Bunda dipanggil guru ke sekolah karena ananda, dan apa yang dipelajari?','a'],
+ ['perjalanan_kota','Perjalanan ke luar kota mana saja yang pernah ditempuh ananda?','a'],
+ ['alergi','Apakah ananda memiliki alergi makanan atau penyakit kronis yang memerlukan penanganan khusus?','a'],
+ ['kelebihan','Apa kelebihan/kekuatan yang dimiliki ananda?','a'],
+ ['kelemahan','Apa kelemahan/kekurangan yang dimiliki ananda?','a'],
+ ['sikap_marah','Seperti apa sikap ananda jika marah?','a'],
+ ['hal_disukai','Hal apa yang disukai ananda?','a'],
+ ['jumlah_hafalan','Berapa juz hafalan ananda saat ini?','t']]},
+{t:'III. Pola pengasuhan', d:'Kebiasaan dan pendidikan di rumah.', f:[
+ ['tauhid','Bagaimana Ayah/Bunda menanamkan tauhid kepada ananda?','a'],
+ ['sholat_jamaah','Bagaimana mengajarkan ananda tentang sholat berjamaah?','a'],
+ ['mengaji','Bagaimana cara membiasakan ananda untuk mengaji?','a'],
+ ['puasa','Bagaimana cara membiasakan ananda berpuasa di bulan Ramadhan?','a'],
+ ['adab_akhlak','Bagaimana cara menerapkan adab dan akhlak kepada ananda?','a'],
+ ['adab_ortu','Ceritakan contoh cara menerapkan adab terhadap orang tua.','a'],
+ ['sayang_kecil','Sebutkan contoh cara menerapkan sikap menyayangi yang lebih kecil.','a'],
+ ['penghargaan','Bentuk penghargaan apa yang pernah diberikan, dan apa sebabnya?','a'],
+ ['hukuman','Bentuk hukuman apa yang pernah diberikan, dan apa sebabnya?','a'],
+ ['pendamping_main','Dalam aktivitas bermain, siapa yang mendampingi ananda?','t'],
+ ['aturan_tv','Apakah ananda diperbolehkan menonton televisi? Kapan waktunya?','a'],
+ ['aturan_hp','Kapan ananda diperbolehkan bermain HP (gadget)? Apa yang dimainkan dan berapa lama?','a'],
+ ['bersyukur','Sebutkan satu pengalaman yang membuat Ayah/Bunda bersyukur sebagai orang tua ananda.','a'],
+ ['bersalah','Kejadian apa yang membuat Ayah/Bunda merasa bersalah kepada ananda?','a']]},
+{t:'IV. Peran serta orang tua', d:'Kesediaan Ayah/Bunda bermitra dengan sekolah.', f:[
+ ['dukung_program','Bersediakah Ayah/Bunda mendukung program yang ditetapkan sekolah?','r',SB],
+ ['parenting_harap','Program parenting seperti apa yang Ayah/Bunda harapkan diselenggarakan sekolah?','a'],
+ ['selaras_asuh','Bersediakah Ayah/Bunda menyelaraskan pola asuh di sekolah dengan di rumah?','r',SB],
+ ['murojaah_rumah',"Bersediakah Ayah/Bunda membimbing ananda muroja'ah (mengulang hafalan) di rumah?",'r',SB],
+ ['faktor_sukses','Menurut Ayah/Bunda, faktor apa saja yang mendukung keberhasilan pendidikan ananda di sekolah?','a'],
+ ['kerjasama_masalah','Jika ananda bermasalah di sekolah, bersediakah Ayah/Bunda bekerja sama menyelesaikannya?','r',SB]]},
+{t:'V. Identifikasi sekolah', d:'Pengamatan dan pemahaman Ayah/Bunda tentang sekolah.', f:[
+ ['pengamatan_sarpras','Bagaimana pengamatan Ayah/Bunda terhadap gedung, sarana dan prasarana sekolah? Apa yang perlu ditingkatkan?','a'],
+ ['dukungan_kurikulum','Apakah Ayah/Bunda siap mendukung kurikulum dan program sekolah (tahfidz, outing class, dll)?','a'],
+ ['pemahaman_biaya','Pembiayaan sekolah muncul berdasarkan program dan kebutuhan sarana penunjang KBM. Bagaimana pemahaman Ayah/Bunda tentang hal ini?','a']]},
+{t:'VI. Program orang tua asuh (wakaf rutin)', d:'Dar An-Najah membuka peluang wakaf rutin yang dibayarkan bersamaan dengan SPP ananda.', f:[
+ ['sedia_wakaf','Apakah Ayah/Bunda bersedia mengikuti wakaf rutin?','r',['Bersedia','Belum Bersedia']],
+ ['nominal_wakaf','Pilih besaran wakaf per bulan','r',['Rp. 20.000','Rp. 50.000','Rp. 80.000','Rp. 100.000'],0,'sedia_wakaf=Bersedia'],
+ ['nominal_wakaf_lain','Nominal lain (Rp per bulan)','n',0,0,'sedia_wakaf=Bersedia']]}
+];
+
+const $ = s => document.querySelector(s);
+const esc = s => s.replace(/"/g, '&quot;');
+let cur = 0;
+
+function field(f, n) {
+  const [k, l, y, o, req, dep] = f;
+  const num = y === 'o' ? '' : `<em>${n}.</em>`;
+  let h = `<div class="f${y === 'o' ? ' sub' : ''}" data-k="${k}"${dep ? ` data-dep="${dep}" hidden` : ''}>`;
+  if (y === 'o') h += `<input type="text" name="${k}" placeholder="${esc(l)}" aria-label="${esc(l)}">`;
+  else {
+    h += `<label class="q" for="${k}">${num}${l}${req ? '<b>*</b>' : ''}</label>`;
+    if (y === 't') h += `<input type="text" id="${k}" name="${k}">`;
+    if (y === 'p') h += `<input type="tel" id="${k}" name="${k}" inputmode="tel" placeholder="08xxxxxxxxxx">`;
+    if (y === 'n') h += `<input type="number" id="${k}" name="${k}" min="0" inputmode="numeric" placeholder="Contoh: 150000">`;
+    if (y === 'a') h += `<textarea id="${k}" name="${k}" rows="3" placeholder="Tuliskan jawaban Ayah/Bunda..."></textarea>`;
+    if (y === 'r') h += `<div class="chips" role="radiogroup">${o.map(v => `<label class="chip"><input type="radio" name="${k}" value="${esc(v)}"><span>${v}</span></label>`).join('')}</div>`;
+    if (req) h += `<div class="msg">Bagian ini wajib diisi.</div>`;
+  }
+  return h + '</div>';
+}
+
+$('#steps').innerHTML = S.map((s, i) => {
+  let n = 0;
+  return `<section class="step" data-i="${i}"><h2>${s.t}</h2><p>${s.d}</p>${s.f.map(f => field(f, f[2] === 'o' ? 0 : ++n)).join('')}</section>`;
+}).join('');
+
+function show(i) {
+  cur = i;
+  document.querySelectorAll('.step').forEach((el, j) => el.classList.toggle('on', j === i));
+  $('#stepName').textContent = S[i].t;
+  $('#stepNum').textContent = `Langkah ${i + 1} dari ${S.length}`;
+  $('#bar').style.width = ((i + 1) / S.length * 100) + '%';
+  $('#back').style.visibility = i ? 'visible' : 'hidden';
+  $('#next').textContent = i === S.length - 1 ? 'Kirim formulir' : 'Lanjut';
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function valid() {
+  let ok = true;
+  document.querySelectorAll(`.step[data-i="${cur}"] .f`).forEach(f => {
+    const el = f.querySelector('input,textarea');
+    const spec = S[cur].f.find(x => x[0] === f.dataset.k);
+    if (spec && spec[4]) {
+      const bad = !el.value.trim();
+      f.classList.toggle('bad', bad);
+      if (bad && ok) { el.focus(); ok = false; }
+    }
+  });
+  return ok;
+}
+
+function deps() {
+  document.querySelectorAll('[data-dep]').forEach(f => {
+    const [k, v] = f.dataset.dep.split('=');
+    const c = document.querySelector(`input[name="${k}"]:checked`);
+    f.hidden = !(c && c.value === v);
+    if (f.hidden) f.querySelectorAll('input').forEach(i => { i.checked = false; if (i.type !== 'radio') i.value = ''; });
+  });
+}
+
+// Simpan draf otomatis supaya isian tidak hilang saat halaman tertutup
+const KEY = 'observasi-ppdb-draft';
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(Object.fromEntries(new FormData($('#form'))))); } catch (e) {}
+}
+function restore() {
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY) || '{}');
+    Object.entries(d).forEach(([k, v]) => {
+      document.querySelectorAll(`[name="${k}"]`).forEach(el => {
+        if (el.type === 'radio') el.checked = el.value === v; else el.value = v;
+      });
+    });
+  } catch (e) {}
+  deps();
+}
+
+const WA_LINK = 'https://chat.whatsapp.com/GMALqYoARtw4EXmWV7bT4Z?s=sh&p=a&mlu=4&ilr=4&iam=2';
+const SID = Date.now().toString(36) + Math.random().toString(36).slice(2, 8); // ID unik agar kirim ulang tidak ganda
+const ICON = {
+  ok: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#13604f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  bad: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  load: '<i></i>'
+};
+
+function dlg(state) {
+  const A = $('#dA');
+  A.innerHTML = '';
+  $('#ov').hidden = false;
+  const add = (t, c, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn ' + c; b.textContent = t; b.onclick = fn; A.appendChild(b); };
+  const set = (cls, ic, t, m) => { $('#dI').className = 'ic ' + cls; $('#dI').innerHTML = ic; $('#dT').textContent = t; $('#dM').textContent = m; };
+  if (state === 'load') set('load', ICON.load, 'Sedang mengirim data...', 'Mohon tunggu dan jangan tutup halaman ini.');
+  if (state === 'ok') {
+    set('ok', ICON.ok, 'Data berhasil terkirim', 'Jazakumullahu khairan. Silakan beri tahu panitia di grup WhatsApp bahwa Ayah/Bunda sudah mengisi data.');
+    add('Kirim ke grup WhatsApp', 'p wa', toWA);
+    add('Tutup', 's', closePage);
+  }
+  if (state === 'fail') {
+    set('bad', ICON.bad, 'Data belum terkirim', 'Periksa koneksi internet. Isian Ayah/Bunda masih tersimpan, jadi tidak perlu mengisi ulang.');
+    add('Coba kirim ulang', 'p', send);
+    add('Cek data', 's', () => { $('#ov').hidden = true; });
+  }
+}
+
+function toWA() {
+  const msg = `Assalamu'alaikum. Kami ${$('#nama_ortu').value.trim()}, orang tua dari ananda ${$('#nama_ananda').value.trim()}, sudah mengisi Lembar Isian Observasi PPDB SMPIT Dar An Najah.`;
+  try { navigator.clipboard.writeText(msg); } catch (e) {}
+  $('#dM').textContent = 'Pesan konfirmasi sudah disalin. Tempel dan kirim di grup WhatsApp.';
+  window.open(WA_LINK, '_blank', 'noopener');
+}
+
+function closePage() {
+  $('#ov').hidden = true;
+  $('#form').style.display = 'none';
+  document.querySelector('.top').style.display = 'none';
+  $('#done').style.display = 'block';
+  window.scrollTo({top: 0});
+  window.close(); // hanya berhasil jika halaman dibuka lewat skrip; selain itu layar terima kasih tetap tampil
+}
+
+async function send() {
+  if (!SCRIPT_URL || SCRIPT_URL.startsWith('PASTE')) { alert('URL Google Apps Script belum diisi pada file HTML.'); return; }
+  dlg('load');
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 30000);
+  try {
+    const fd = new FormData($('#form'));
+    fd.set('submission_id', SID);
+    const res = await fetch(SCRIPT_URL, {method: 'POST', body: new URLSearchParams(fd), signal: ctrl.signal});
+    const out = await res.json();
+    if (!out.ok) throw new Error(out.error || 'gagal');
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    dlg('ok');
+  } catch (e) {
+    dlg('fail');
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+$('#next').onclick = () => { if (!valid()) return; cur < S.length - 1 ? show(cur + 1) : send(); };
+$('#back').onclick = () => show(cur - 1);
+$('#form').addEventListener('change', () => { deps(); save(); });
+$('#form').addEventListener('input', e => { e.target.closest('.f')?.classList.remove('bad'); save(); });
+restore();
+show(0);
+</script>
+</body>
+</html>
